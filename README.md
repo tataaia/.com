@@ -1,32 +1,29 @@
-# 3D Room Exhibition
+# On-Scroll SVG Filter Effect
 
-A highly experimental 3D room layout for a gallery that aims to show exhibition details in an interesting way.
+Combining GSAP's Scroll Trigger and Flip with a SVG Filter, based on a demo by Fabio Ottaviani.
 
-[Article on Codrops](https://tympanus.net/codrops/?p=30534)
+![On-Scroll SVG Filter Effects](https://tympanus.net/codrops/wp-content/uploads/2023/07/onscrollfilter_feat-1.jpg)
 
-[Demo](http://tympanus.net/Development/Exhibition/)
+[Article on Codrops](https://tympanus.net/codrops/?p=72802)
+
+[Demo](http://tympanus.net/Development/OnScrollFilter/)
+
+## Installation
+
+Run this demo on a [local server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Tools_and_setup/set_up_a_local_testing_server).
 
 ## Credits
 
-- [anime.js](http://anime-js.com/) by Julian Garnier
-- [imagesLoaded](http://imagesloaded.desandro.com/) by David DeSandro
-- Images from [Unsplash.com](http://unsplash.com)
-- Font used: [Josefin Sans](https://fonts.google.com/specimen/Josefin+Sans)
-
-## License
-This resource can be used freely if integrated or build upon in personal or commercial projects such as websites, web apps and web templates intended for sale. It is not allowed to take the resource "as-is" and sell it, redistribute, re-publish it, or sell "pluginized" versions of it. Free plugins built using this resource should have a visible mention and link to the original work. Always consider the licenses of all included libraries, scripts and images used. 
+- Images generated with [Midjourney](https://midjourney.com)
 
 ## Misc
 
-Follow Codrops: [Twitter](http://www.twitter.com/codrops), [Facebook](http://www.facebook.com/codrops), [Google+](https://plus.google.com/101095823814290637419), [GitHub](https://github.com/codrops), [Pinterest](http://www.pinterest.com/codrops/), [Instagram](https://www.instagram.com/codropsss/)
+Follow Codrops: [Twitter](http://www.twitter.com/codrops), [Facebook](http://www.facebook.com/codrops), [GitHub](https://github.com/codrops), [Instagram](https://www.instagram.com/codropsss/)
 
-[© Codrops 2017](http://www.codrops.com)
+## License
+[MIT](LICENSE)
 
-
-
-
-
-
+Made with :blue_heart:  by [Codrops](http://www.codrops.com)
 
 
 
