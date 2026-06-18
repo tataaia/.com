@@ -1,31 +1,44 @@
-# On-Scroll SVG Filter Effect
+# TATA AIA Life Insurance - Interactive Home Page
 
-Combining GSAP's Scroll Trigger and Flip with a SVG Filter, based on a demo by Fabio Ottaviani.
+Welcome to the interactive and storytelling homepage of **TATA AIA Life Insurance**. This project is designed to present core insurance values, legacy trust, safety shields, and policy details in an immersive, non-congested scroll-triggered format.
 
-![On-Scroll SVG Filter Effects](https://tympanus.net/codrops/wp-content/uploads/2023/07/onscrollfilter_feat-1.jpg)
+Using modern web design methodologies, this portal ensures users learn why financial protection is essential and how they can secure their family's future.
 
-[Article on Codrops](https://tympanus.net/codrops/?p=72802)
+## ✨ Key Features
 
-[Demo](http://tympanus.net/Development/OnScrollFilter/)
+*   **Interactive On-Scroll SVG Filters**: Visual mask transitions powered by GSAP's `ScrollTrigger` and `Flip` to reveal premium section graphics.
+*   **Floating Glassmorphic Header**: A sticky, modern header styled with a backdrop blur filter for clean floating navigation.
+*   **Highly Readable Typography**: Styled with responsive font-size clamps and sentence-case paragraphs to prevent overlapping and ensure smooth readability across screen sizes.
+*   **Visual Hover Interactions**: Resources cards lift on hover (`translateY`) with smooth image zoom-scaling and red/coral shadows to highlight selections.
+*   **Robust Loader Fallback**: Custom font preloader fallback logic to prevent black-screen hangs if remote CDNs are slow.
 
-## Installation
+## 📁 Content Structure
 
-Run this demo on a [local server](https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Tools_and_setup/set_up_a_local_testing_server).
+1.  **Protecting Dreams (Hero Section)**: Dynamic landing screen with TATA AIA branding.
+2.  **Legacy & Trust**: Highlighting the legacy of the Tata Group combined with AIA's global strength.
+3.  **Shield & Family**: Emotional representation of family security.
+4.  **Maha & Raksha**: Explaining the term life protection plan.
+5.  **Wealth & Grow**: Showcasing savings and market-linked investment growth.
+6.  **Global & Insight**: Stat-based insights about the under-insurance gap.
+7.  **Peace & Mind**: Inspirational quote of security.
+8.  **Secure & Today**: Strong call to action.
+9.  **Helpful Resources**: Links to Wikipedia records, risk articles, and Buffett quotes.
 
-## Credits
+## 🚀 Running Locally
 
-- Images generated with [Midjourney](https://midjourney.com)
+To run this project locally, simply start a development server in the root directory:
 
-## Misc
+**Using Python:**
+```bash
+python -m http.server 8000
+```
 
-Follow Codrops: [Twitter](http://www.twitter.com/codrops), [Facebook](http://www.facebook.com/codrops), [GitHub](https://github.com/codrops), [Instagram](https://www.instagram.com/codropsss/)
+**Using Node.js (http-server):**
+```bash
+npx http-server -p 8000
+```
 
-## License
-[MIT](LICENSE)
+Once running, navigate to `http://localhost:8000` in your browser.
 
-Made with :blue_heart:  by [Codrops](http://www.codrops.com)
-
-
-
-
-
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
