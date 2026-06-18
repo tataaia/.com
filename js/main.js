@@ -77,6 +77,10 @@
 	DOM.infoOverlay = DOM.content.querySelector('.overlay--info');
 	// The info text.
 	DOM.infoText = DOM.infoOverlay.querySelector('.info');
+	// The permission overlay.
+	DOM.permissionOverlay = document.getElementById('permission-overlay');
+	// The enable motion button.
+	DOM.enableMotionBtn = document.getElementById('enable-motion-btn');
 
 	var	currentRoom = 0,
 		// Total number of rooms.
@@ -118,6 +122,22 @@
 		win = {width: window.innerWidth, height: window.innerHeight},
 		// Check if moving inside the room and check if navigating.
 		isMoving, isNavigating;
+
+	var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+	               (window.matchMedia && window.matchMedia('(max-width: 50em)').matches);
+	var firstEvent = true;
+	var baseBeta = 0;
+	var baseGamma = 0;
+	var currentRotX = 0;
+	var currentRotY = 0;
+	var driftFactor = 0.05;
+	var isDragging = false;
+	var startTouchX = 0;
+	var startTouchY = 0;
+	var dragRotX = 0;
+	var dragRotY = 0;
+	var targetDragRotX = 0;
+	var targetDragRotY = 0;
 
 	function init() {
 		// Move into the current room.
@@ -193,7 +213,9 @@
 				win = {width: window.innerWidth, height: window.innerHeight};
 			}, 10);
 		
-		document.addEventListener('mousemove', onMouseMoveFn);
+		if (!isMobile) {
+			document.addEventListener('mousemove', onMouseMoveFn);
+		}
 		window.addEventListener('resize', debounceResizeFn);
 
 		// Room navigation.
@@ -556,6 +578,215 @@
 		anime(animeInfoOpts);
 	}
 
+	function onDeviceOrientation(ev) {
+		if (!tilt) return;
+
+		var beta = ev.beta;   // -180 to 180 (front/back tilt)
+		var gamma = ev.gamma; // -90 to 90 (left/right tilt)
+
+		if (beta === null || gamma === null) return;
+
+		if (firstEvent) {
+			baseBeta = beta;
+			baseGamma = gamma;
+			firstEvent = false;
+			return;
+		}
+
+		// Slowly adapt the base to the user's holding position (auto-centering)
+		baseBeta = baseBeta * (1 - driftFactor) + beta * driftFactor;
+		baseGamma = baseGamma * (1 - driftFactor) + gamma * driftFactor;
+
+		var relBeta = beta - baseBeta;
+		var relGamma = gamma - baseGamma;
+
+		// Constrain relative angles to +/- 25 degrees
+		relBeta = Math.max(-25, Math.min(25, relBeta));
+		relGamma = Math.max(-25, Math.min(25, relGamma));
+
+		// Adjust for screen orientation angle if device rotates
+		var orientation = window.orientation || (window.screen && window.screen.orientation && window.screen.orientation.angle) || 0;
+		var targetRotX = 0;
+		var targetRotY = 0;
+
+		if (orientation === 90) {
+			targetRotY = -relBeta * 0.6;
+			targetRotX = relGamma * 0.25;
+		} else if (orientation === -90) {
+			targetRotY = relBeta * 0.6;
+			targetRotX = -relGamma * 0.25;
+		} else if (orientation === 180) {
+			targetRotY = relGamma * 0.6;
+			targetRotX = relBeta * 0.25;
+		} else { // Portrait
+			targetRotY = -relGamma * 0.6;
+			targetRotX = -relBeta * 0.25;
+		}
+
+		currentRotX = currentRotX * 0.8 + targetRotX * 0.2;
+		currentRotY = currentRotY * 0.8 + targetRotY * 0.2;
+
+		requestAnimationFrame(function() {
+			applyRoomTransform({
+				'translateX' : initTransform.translateX, 
+				'translateY' : initTransform.translateY, 
+				'translateZ' : initTransform.translateZ, 
+				'rotateX' : currentRotX + 'deg', 
+				'rotateY' : currentRotY + 'deg',
+				'rotateZ' : initTransform.rotateZ
+			});
+		});
+	}
+
+	function initTouchDrag() {
+		document.addEventListener('touchstart', function(e) {
+			if (e.touches.length === 1 && tilt) {
+				isDragging = true;
+				startTouchX = e.touches[0].clientX;
+				startTouchY = e.touches[0].clientY;
+				dragRotX = currentRotX;
+				dragRotY = currentRotY;
+			}
+		});
+
+		document.addEventListener('touchmove', function(e) {
+			if (!isDragging || !tilt) return;
+			var touchX = e.touches[0].clientX;
+			var touchY = e.touches[0].clientY;
+
+			var deltaX = touchX - startTouchX;
+			var deltaY = touchY - startTouchY;
+
+			targetDragRotY = dragRotY + (deltaX / win.width) * 30; // Max Y tilt +/- 15 deg
+			targetDragRotX = dragRotX - (deltaY / win.height) * 15; // Max X tilt +/- 7.5 deg
+
+			targetDragRotY = Math.max(-15, Math.min(15, targetDragRotY));
+			targetDragRotX = Math.max(-7.5, Math.min(7.5, targetDragRotX));
+
+			currentRotX = currentRotX * 0.8 + targetDragRotX * 0.2;
+			currentRotY = currentRotY * 0.8 + targetDragRotY * 0.2;
+
+			applyRoomTransform({
+				'translateX' : initTransform.translateX, 
+				'translateY' : initTransform.translateY, 
+				'translateZ' : initTransform.translateZ, 
+				'rotateX' : currentRotX + 'deg', 
+				'rotateY' : currentRotY + 'deg',
+				'rotateZ' : initTransform.rotateZ
+			});
+		});
+
+		document.addEventListener('touchend', function() {
+			if (isDragging) {
+				isDragging = false;
+				var returnToCenter = setInterval(function() {
+					if (isDragging) {
+						clearInterval(returnToCenter);
+						return;
+					}
+					targetDragRotX *= 0.85;
+					targetDragRotY *= 0.85;
+					currentRotX = currentRotX * 0.8 + targetDragRotX * 0.2;
+					currentRotY = currentRotY * 0.8 + targetDragRotY * 0.2;
+
+					applyRoomTransform({
+						'translateX' : initTransform.translateX, 
+						'translateY' : initTransform.translateY, 
+						'translateZ' : initTransform.translateZ, 
+						'rotateX' : currentRotX + 'deg', 
+						'rotateY' : currentRotY + 'deg',
+						'rotateZ' : initTransform.rotateZ
+					});
+
+					if (Math.abs(currentRotX) < 0.05 && Math.abs(currentRotY) < 0.05) {
+						clearInterval(returnToCenter);
+						currentRotX = 0;
+						currentRotY = 0;
+					}
+				}, 16);
+			}
+		});
+	}
+
+	function initSwipeGestures() {
+		var touchStartX = 0;
+		var touchStartY = 0;
+		var touchStartTime = 0;
+
+		document.addEventListener('touchstart', function(e) {
+			if (e.touches.length === 1) {
+				touchStartX = e.touches[0].clientX;
+				touchStartY = e.touches[0].clientY;
+				touchStartTime = Date.now();
+			}
+		}, {passive: true});
+
+		document.addEventListener('touchend', function(e) {
+			if (e.changedTouches.length === 1) {
+				var touchEndX = e.changedTouches[0].clientX;
+				var touchEndY = e.changedTouches[0].clientY;
+				var touchEndTime = Date.now();
+
+				var diffX = touchEndX - touchStartX;
+				var diffY = touchEndY - touchStartY;
+				var duration = touchEndTime - touchStartTime;
+
+				if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY) && duration < 300) {
+					if (diffX < 0) {
+						navigate('next');
+					} else {
+						navigate('prev');
+					}
+				}
+			}
+		}, {passive: true});
+	}
+
+	function handlePermissionStart() {
+		if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+			DeviceOrientationEvent.requestPermission()
+				.then(function(permissionState) {
+					if (permissionState === 'granted') {
+						startExperience(true);
+					} else {
+						startExperience(false);
+					}
+				})
+				.catch(function(err) {
+					console.error('Permission request failed:', err);
+					startExperience(false);
+				});
+		} else {
+			if (window.DeviceOrientationEvent) {
+				startExperience(true);
+			} else {
+				startExperience(false);
+			}
+		}
+	}
+
+	function startExperience(hasSensor) {
+		anime({
+			targets: DOM.permissionOverlay,
+			duration: 500,
+			easing: 'easeOutCubic',
+			opacity: 0,
+			complete: function() {
+				DOM.permissionOverlay.classList.remove('overlay--active');
+			}
+		});
+
+		init();
+
+		if (hasSensor) {
+			window.addEventListener('deviceorientation', onDeviceOrientation);
+		} else {
+			initTouchDrag();
+		}
+
+		initSwipeGestures();
+	}
+
 	// Preload all the images.
 	imagesLoaded(DOM.scroller, function() {
 		var extradelay = 1000;
@@ -567,7 +798,13 @@
 			delay: extradelay,
 			translateY: '-100%',
 			begin: function() {
-				init();
+				if (isMobile) {
+					// Show permission screen
+					DOM.permissionOverlay.classList.add('overlay--active');
+					DOM.enableMotionBtn.addEventListener('click', handlePermissionStart);
+				} else {
+					init();
+				}
 			},
 			complete: function() {
 				DOM.loader.classList.remove('overlay--active');
